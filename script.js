@@ -1,47 +1,66 @@
-async function checkAlerts() {
+let events = JSON.parse(localStorage.getItem("events")) || [];
 
-const keywords = [
-"war",
-"missile",
-"attack",
-"iran",
-"iraq",
-"explosion",
-"drone",
-"airspace",
-"siren",
-"military"
-];
+function addEvent(type){
 
-try {
+const now = new Date();
 
-const response = await fetch(
-"https://api.allorigins.win/raw?url=https://news.google.com/rss/search?q=kuwait&hl=en-US&gl=US&ceid=US:en"
-);
-
-const text = await response.text();
-
-let alertFound = false;
-
-keywords.forEach(word => {
-if(text.toLowerCase().includes(word)) {
-alertFound = true;
-}
+events.push({
+type: type,
+time: now.toLocaleTimeString(),
+date: now.toDateString()
 });
 
-if(alertFound){
-document.getElementById("alert").style.display="block";
-document.getElementById("safe").style.display="none";
+localStorage.setItem("events", JSON.stringify(events));
+
+render();
 }
 
-} catch(error){
-console.log("Error checking alerts");
+function render(){
+
+let missilesToday = 0;
+let dronesToday = 0;
+let sirensToday = 0;
+
+let missilesTotal = 0;
+let dronesTotal = 0;
+let sirensTotal = 0;
+
+const today = new Date().toDateString();
+
+const list = document.getElementById("alerts");
+list.innerHTML = "";
+
+events.forEach(e=>{
+
+if(e.type === "missile"){
+missilesTotal++;
+if(e.date === today) missilesToday++;
 }
 
+if(e.type === "drone"){
+dronesTotal++;
+if(e.date === today) dronesToday++;
 }
 
-// check every 1 minute
-setInterval(checkAlerts, 60000);
+if(e.type === "siren"){
+sirensTotal++;
+if(e.date === today) sirensToday++;
+}
 
-// run immediately
-checkAlerts();
+const li = document.createElement("li");
+li.innerText = `${e.time} — ${e.type}`;
+list.appendChild(li);
+
+});
+
+document.getElementById("missilesToday").innerText = missilesToday;
+document.getElementById("dronesToday").innerText = dronesToday;
+document.getElementById("sirensToday").innerText = sirensToday;
+
+document.getElementById("missilesTotal").innerText = missilesTotal;
+document.getElementById("dronesTotal").innerText = dronesTotal;
+document.getElementById("sirensTotal").innerText = sirensTotal;
+
+}
+
+render();
