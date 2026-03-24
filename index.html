@@ -1,54 +1,39 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>Kuwait War Alert</title>
+<h1>🇰🇼 Kuwait War Monitor</h1>
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<h2>Today</h2>
 
-<style>
-
-body{
-font-family: Arial;
-background:#0b1220;
-color:white;
-text-align:center;
-padding-top:50px;
-}
-
-.alert{
-background:#ff3b3b;
-padding:20px;
-font-size:22px;
-display:none;
-margin:20px;
-border-radius:10px;
-}
-
-.safe{
-background:#00b894;
-padding:20px;
-font-size:22px;
-margin:20px;
-border-radius:10px;
-}
-
-</style>
-
-</head>
-
-<body>
-
-<h1>🇰🇼 Kuwait War Alert Monitor</h1>
-
-<div id="alert" class="alert">
-⚠️ WAR ALERT DETECTED
+<div class="safe">
+🚀 Missiles: <span id="missilesToday">0</span>
 </div>
 
-<div id="safe" class="safe">
-✅ No threats detected in Kuwait
+<div class="safe">
+🛸 Drones: <span id="dronesToday">0</span>
 </div>
 
-<script src="script.js"></script>
+<div class="safe">
+🔊 Sirens: <span id="sirensToday">0</span>
+</div>
 
-</body>
-</html>
+<h2>Since War Started</h2>
+
+<div class="alert">
+🚀 Missiles: <span id="missilesTotal">0</span>
+</div>
+
+<div class="alert">
+🛸 Drones: <span id="dronesTotal">0</span>
+</div>
+
+<div class="alert">
+🔊 Sirens: <span id="sirensTotal">0</span>
+</div>
+
+<h2>Recent Alerts</h2>
+
+<ul id="alerts"></ul>
+
+<br><br>
+
+<button onclick="addEvent('missile')">Add Missile</button>
+<button onclick="addEvent('drone')">Add Drone</button>
+<button onclick="addEvent('siren')">Add Siren</button>
