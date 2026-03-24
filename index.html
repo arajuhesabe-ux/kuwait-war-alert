@@ -5,95 +5,273 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kuwait War Alert Dashboard</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            background: #0b1220;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0b1220 0%, #1a1f2e 100%);
             color: white;
             text-align: center;
             padding: 20px;
+            min-height: 100vh;
         }
 
         h1 {
-            font-size: 2em;
+            font-size: 2.5em;
             margin-bottom: 10px;
+            background: linear-gradient(135deg, #00b894, #00cec9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: #888;
+            margin-bottom: 30px;
+            font-size: 0.9em;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .section {
+            background: rgba(30, 39, 46, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 184, 148, 0.3);
         }
 
         h2 {
-            margin-top: 30px;
             color: #00b894;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            border-bottom: 2px solid #00b894;
+            display: inline-block;
+            padding-bottom: 5px;
+        }
+
+        .counter-grid {
+            display: grid;
+            gap: 15px;
+            margin-top: 20px;
         }
 
         .counter {
-            background-color: #1e272e;
-            margin: 10px auto;
+            background: linear-gradient(135deg, #2c3e50, #1e272e);
             padding: 15px;
             border-radius: 10px;
-            width: 250px;
-            font-size: 1.2em;
+            transition: transform 0.3s ease;
         }
 
-        .alert-counter {
-            background-color: #ff3b3b;
+        .counter:hover {
+            transform: translateY(-2px);
+        }
+
+        .counter-label {
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .counter-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #00b894;
+        }
+
+        .alert-section {
+            grid-column: 1 / -1;
+        }
+
+        .alerts-container {
+            background: #1e272e;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+
+        .alerts-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #333;
+        }
+
+        .refresh-btn {
+            background: #00b894;
+            border: none;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .refresh-btn:hover {
+            background: #00a884;
         }
 
         ul#alerts {
-            list-style-type: none;
-            padding-left: 0;
-            max-height: 300px;
+            list-style: none;
+            max-height: 400px;
             overflow-y: auto;
-            margin-top: 20px;
-            border: 1px solid #333;
-            padding: 10px;
-            border-radius: 10px;
-            background-color: #1e272e;
         }
 
         ul#alerts li {
-            margin: 5px 0;
+            padding: 12px;
+            margin: 8px 0;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            border-left: 4px solid #00b894;
+            text-align: left;
+            transition: background 0.3s ease;
+        }
+
+        ul#alerts li:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .alert-time {
+            color: #00b894;
+            font-weight: bold;
+        }
+
+        .alert-type {
+            color: #ff6b6b;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .alert-source {
+            color: #888;
+            font-size: 0.9em;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #888;
+        }
+
+        .error {
+            background: rgba(255, 59, 59, 0.2);
+            border: 1px solid #ff3b3b;
+            color: #ff6b6b;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
         }
 
         footer {
             margin-top: 50px;
+            padding: 20px;
             font-size: 0.8em;
             color: #888;
+            border-top: 1px solid #333;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .updating {
+            animation: pulse 1s ease-in-out;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+            }
+            
+            .counter-value {
+                font-size: 2em;
+            }
         }
     </style>
 </head>
 <body>
 
     <h1>🇰🇼 Kuwait War Alert Dashboard</h1>
+    <div class="subtitle">Real-time monitoring of security incidents</div>
 
-    <h2>Today</h2>
-    <div class="counter">
-        🚀 Missiles Today: <span id="missilesToday">0</span>
-    </div>
-    <div class="counter">
-        🛸 Drones Today: <span id="dronesToday">0</span>
-    </div>
-    <div class="counter">
-        🔊 Sirens Today: <span id="sirensToday">0</span>
-    </div>
+    <div class="dashboard-grid">
+        <div class="section">
+            <h2>📊 Today's Statistics</h2>
+            <div class="counter-grid">
+                <div class="counter">
+                    <div class="counter-label">🚀 Missile Alerts</div>
+                    <div class="counter-value" id="missilesToday">0</div>
+                </div>
+                <div class="counter">
+                    <div class="counter-label">🛸 Drone Incidents</div>
+                    <div class="counter-value" id="dronesToday">0</div>
+                </div>
+                <div class="counter">
+                    <div class="counter-label">🔊 Siren Alerts</div>
+                    <div class="counter-value" id="sirensToday">0</div>
+                </div>
+            </div>
+        </div>
 
-    <h2>Since War Started</h2>
-    <div class="counter alert-counter">
-        🚀 Missiles Total: <span id="missilesTotal">0</span>
-    </div>
-    <div class="counter alert-counter">
-        🛸 Drones Total: <span id="dronesTotal">0</span>
-    </div>
-    <div class="counter alert-counter">
-        🔊 Sirens Total: <span id="sirensTotal">0</span>
-    </div>
+        <div class="section">
+            <h2>📈 Total Since War Started</h2>
+            <div class="counter-grid">
+                <div class="counter">
+                    <div class="counter-label">🚀 Missile Alerts</div>
+                    <div class="counter-value" id="missilesTotal">0</div>
+                </div>
+                <div class="counter">
+                    <div class="counter-label">🛸 Drone Incidents</div>
+                    <div class="counter-value" id="dronesTotal">0</div>
+                </div>
+                <div class="counter">
+                    <div class="counter-label">🔊 Siren Alerts</div>
+                    <div class="counter-value" id="sirensTotal">0</div>
+                </div>
+            </div>
+        </div>
 
-    <h2>Recent Alerts</h2>
-    <ul id="alerts"></ul>
-
-    <!-- Link to your JS file -->
-    <script src="script.js"></script>
+        <div class="section alert-section">
+            <div class="alerts-header">
+                <h2>📋 Recent Alerts Timeline</h2>
+                <button class="refresh-btn" onclick="manualRefresh()">🔄 Refresh</button>
+            </div>
+            <div class="alerts-container">
+                <div id="alertsList">
+                    <div class="loading">Loading alerts...</div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <footer>
-        Data powered by RSS feeds and Supabase | Auto-updates every minute
+        <div>Data powered by RSS feeds and Supabase | Auto-updates every 60 seconds</div>
+        <div>Last updated: <span id="lastUpdated">--:--:--</span></div>
     </footer>
 
+    <script src="script.js"></script>
 </body>
 </html>
