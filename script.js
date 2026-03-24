@@ -1,8 +1,8 @@
 // ------------------------------
-// CONFIGURE THESE
+// CONFIGURATION
 // ------------------------------
-const SUPABASE_URL = "YOUR_SUPABASE_URL"; // Example: https://abcd.supabase.co
-const SUPABASE_KEY = "YOUR_SUPABASE_ANON_KEY"; // anon public key
+const SUPABASE_URL = "https://srunqcpfoivygfvnmjky.supabase.co"; // Example: https://abcd.supabase.co
+const SUPABASE_KEY = "sb_publishable_ADX5_zP9tcgVqS2dYXR1MA_0H04FgpV"; // anon public key
 const RSS_FEEDS = [
     "https://news.google.com/rss/search?q=kuwait+missile+drone+siren&hl=en-US&gl=US&ceid=US:en",
     "https://www.aljazeera.com/xml/rss/all.xml",
@@ -13,32 +13,40 @@ const KEYWORDS = ["missile", "drone", "siren"];
 
 let events = [];
 
-// Fetch events from Supabase
+// Load existing events from Supabase
 async function loadEvents() {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/events?select=*`, {
-        headers: {
-            "apikey": SUPABASE_KEY,
-            "Authorization": `Bearer ${SUPABASE_KEY}`
-        }
-    });
-    events = await res.json();
-    render();
+    try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/events?select=*`, {
+            headers: {
+                "apikey": SUPABASE_KEY,
+                "Authorization": `Bearer ${SUPABASE_KEY}`
+            }
+        });
+        events = await res.json();
+        render();
+    } catch (err) {
+        console.log("Error loading events:", err);
+    }
 }
 
-// Save a new event to Supabase
+// Save new event to Supabase
 async function saveEvent(type, time, date, source) {
-    await fetch(`${SUPABASE_URL}/rest/v1/events`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "apikey": SUPABASE_KEY,
-            "Authorization": `Bearer ${SUPABASE_KEY}`
-        },
-        body: JSON.stringify([{ type, time, date, source }])
-    });
+    try {
+        await fetch(`${SUPABASE_URL}/rest/v1/events`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "apikey": SUPABASE_KEY,
+                "Authorization": `Bearer ${SUPABASE_KEY}`
+            },
+            body: JSON.stringify([{ type, time, date, source }])
+        });
+    } catch (err) {
+        console.log("Error saving event:", err);
+    }
 }
 
-// Check RSS feeds for new events
+// Fetch and process RSS feeds
 async function checkFeeds() {
     for (const feed of RSS_FEEDS) {
         try {
@@ -83,18 +91,9 @@ function render() {
     list.innerHTML = "";
 
     events.slice().reverse().forEach(e => {
-        if (e.type === "missile") {
-            missilesTotal++;
-            if (e.date === today) missilesToday++;
-        }
-        if (e.type === "drone") {
-            dronesTotal++;
-            if (e.date === today) dronesToday++;
-        }
-        if (e.type === "siren") {
-            sirensTotal++;
-            if (e.date === today) sirensToday++;
-        }
+        if (e.type === "missile") { missilesTotal++; if (e.date === today) missilesToday++; }
+        if (e.type === "drone") { dronesTotal++; if (e.date === today) dronesToday++; }
+        if (e.type === "siren") { sirensTotal++; if (e.date === today) sirensToday++; }
 
         const li = document.createElement("li");
         li.innerText = `${e.time} — ${e.type} [${e.source}]`;
@@ -113,4 +112,4 @@ function render() {
 // Initial load
 loadEvents();
 checkFeeds();
-setInterval(checkFeeds, 60000); // check every 1 minute
+setInterval(checkFeeds, 60000); // Check every 1 minute
