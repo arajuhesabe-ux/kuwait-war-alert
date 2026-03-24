@@ -1,39 +1,108 @@
-<h1>🇰🇼 Kuwait War Monitor</h1>
+let events = JSON.parse(localStorage.getItem("events")) || [];
 
-<h2>Today</h2>
+async function checkAlerts() {
 
-<div class="safe">
-🚀 Missiles: <span id="missilesToday">0</span>
-</div>
+try {
 
-<div class="safe">
-🛸 Drones: <span id="dronesToday">0</span>
-</div>
+const response = await fetch(
+"https://api.allorigins.win/raw?url=https://news.google.com/rss/search?q=kuwait+missile+OR+drone+OR+siren&hl=en-US&gl=US&ceid=US:en"
+);
 
-<div class="safe">
-🔊 Sirens: <span id="sirensToday">0</span>
-</div>
+const text = await response.text();
 
-<h2>Since War Started</h2>
+const now = new Date();
 
-<div class="alert">
-🚀 Missiles: <span id="missilesTotal">0</span>
-</div>
+function add(type){
+events.push({
+type:type,
+time: now.toLocaleTimeString(),
+date: now.toDateString()
+});
+}
 
-<div class="alert">
-🛸 Drones: <span id="dronesTotal">0</span>
-</div>
+// detect missiles
+const missileMatches = text.match(/missile/gi);
+if(missileMatches){
+for(let i=0;i<missileMatches.length;i++){
+add("missile");
+}
+}
 
-<div class="alert">
-🔊 Sirens: <span id="sirensTotal">0</span>
-</div>
+// detect drones
+const droneMatches = text.match(/drone/gi);
+if(droneMatches){
+for(let i=0;i<droneMatches.length;i++){
+add("drone");
+}
+}
 
-<h2>Recent Alerts</h2>
+// detect sirens
+const sirenMatches = text.match(/siren/gi);
+if(sirenMatches){
+for(let i=0;i<sirenMatches.length;i++){
+add("siren");
+}
+}
 
-<ul id="alerts"></ul>
+localStorage.setItem("events", JSON.stringify(events));
 
-<br><br>
+render();
 
-<button onclick="addEvent('missile')">Add Missile</button>
-<button onclick="addEvent('drone')">Add Drone</button>
-<button onclick="addEvent('siren')">Add Siren</button>
+} catch(e){
+console.log("error");
+}
+
+}
+
+function render(){
+
+let missilesToday = 0;
+let dronesToday = 0;
+let sirensToday = 0;
+
+let missilesTotal = 0;
+let dronesTotal = 0;
+let sirensTotal = 0;
+
+const today = new Date().toDateString();
+
+const list = document.getElementById("alerts");
+list.innerHTML = "";
+
+events.forEach(e=>{
+
+if(e.type === "missile"){
+missilesTotal++;
+if(e.date === today) missilesToday++;
+}
+
+if(e.type === "drone"){
+dronesTotal++;
+if(e.date === today) dronesToday++;
+}
+
+if(e.type === "siren"){
+sirensTotal++;
+if(e.date === today) sirensToday++;
+}
+
+const li = document.createElement("li");
+li.innerText = `${e.time} — ${e.type}`;
+list.prepend(li);
+
+});
+
+document.getElementById("missilesToday").innerText = missilesToday;
+document.getElementById("dronesToday").innerText = dronesToday;
+document.getElementById("sirensToday").innerText = sirensToday;
+
+document.getElementById("missilesTotal").innerText = missilesTotal;
+document.getElementById("dronesTotal").innerText = dronesTotal;
+document.getElementById("sirensTotal").innerText = sirensTotal;
+
+}
+
+setInterval(checkAlerts, 60000);
+
+checkAlerts();
+render();
